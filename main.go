@@ -8,71 +8,118 @@ import (
 	"errors"
 	"github.com/2xic/bip-39/wordlist"
 	"time"
+	"strings"
 )
 
-func padding_byte(input string, size int) (output string){
+func paddingByte(input string, size int) (output string){
 	for i := len(input); i < size; i++{
 		input = "0" + input 
 	}
 	return input
 }
 
-func generate_random_bytes(byte_count int) (random_bytes []byte){
+func generateRandomBytes(byteCount int) (randomBytes []byte){
 	rand.Seed(time.Now().UnixNano())
-	random := make([]byte, byte_count)
+	random := make([]byte, byteCount)
     rand.Read(random)
     return random
 }
 
-func generate_memonic_bytes(random_bytes []byte) (words_out string, err error){
-	length_bytes := len(random_bytes)
+func generateMnemonicBytes(randomBytes []byte) (wordsOut string, err error){
+	lengthBytes := len(randomBytes)
 
-	if(length_bytes < 16 || 32 < length_bytes || length_bytes % 4 != 0){
+	if(lengthBytes < 16 || 32 < lengthBytes || lengthBytes % 4 != 0){
 		return "", errors.New("invalid length on byte array")
 	}
 
 	bits := ""
-	for i := 0; i < length_bytes; i++ {
-		bits += padding_byte(strconv.FormatInt(int64(random_bytes[i]), 2), 8)
+	for i := 0; i < lengthBytes; i++ {
+		bits += paddingByte(strconv.FormatInt(int64(randomBytes[i]), 2), 8)
 	}
 
-	checksum := generate_checksum(random_bytes)
+	checksum := generateChecksum(randomBytes)
+
 	bits += checksum
 
-	words := ""
+	//words := ""
 	for i := 0; i < len(bits); i+=11 {
 		if 1 < i {
-			words += " "
+			wordsOut += " "
 		}
 		index, err := strconv.ParseInt(bits[i:i+11], 2, 64)
 		if(err != nil){
 			return "", errors.New("invalid byte array")
 		}
-		words += wordlist.Get(index)
+		wordsOut += wordlist.Get(index)
 	}
-	return words, nil
+	return wordsOut, nil
 }
 
-func generate_memonic() (words string, err error){
+func generateMnemonic() (words string, err error){
 	strength := 256
 	if strength % 32 != 0{
 		return "", errors.New("error with strength size")
 	}
-	return generate_memonic_bytes(generate_random_bytes(strength / 8))
+	return generateMnemonicBytes(generateRandomBytes(strength / 8))
 }
 
 
-func generate_checksum(byte_array []byte) (checksum string){	
+func generateChecksum(byteArray []byte) (checksum string){	
 	hash := sha256.New()
-	hash.Write(byte_array)
-	return padding_byte(strconv.FormatInt(int64(hash.Sum(nil)[0]), 2), 8)
+	hash.Write(byteArray)
+	return paddingByte(strconv.FormatInt(int64(hash.Sum(nil)[0]), 2), 8)
+}
+
+func splitString(start int, end int, input string) (output string){
+	for i := start; i < end && i < len(input); i++{
+		output += string(input[i])
+	}
+	return output
+}
+
+func verifyMnemonic(mnemonic string) (valid bool, err error){
+	words := strings.Split(strings.TrimSpace(mnemonic), " ")
+	bits := ""
+	for i := 0; i < len(words); i++{
+		bits += paddingByte(strconv.FormatInt(int64(wordlist.LookUp(words[i])), 2), 11)
+	}
+
+	entropySize := (len(bits) / 33) * 32
+	entropy := splitString(0, entropySize, bits)
+	checksum := splitString(entropySize, len(bits), bits)
+
+	byteStream := make([]byte, 32)
+	for i, j := 0, 0; i < len(entropy); i, j = i + 8, j + 1 {
+		index, err := strconv.ParseInt(entropy[i:i+8], 2, 64)
+		if(err != nil){
+			return false, errors.New("error with entropy parsing")
+			break
+		}
+		byteStream[j] = byte(index)
+	}
+
+	if(strings.Compare(generateChecksum(byteStream), checksum) == 0){
+		return true, nil
+	}
+	return false, nil
 }
 
 func main(){
-	words, err := generate_memonic()
+	words, err := generateMnemonic()
 	if(err != nil){
 		fmt.Println(err)
+	}else{
+		fmt.Println(words)
 	}
-	fmt.Println(words)
+	valid, err := verifyMnemonic(words)
+	if(err != nil){
+		fmt.Println(err)
+	}else{
+		if(valid){
+			fmt.Println("valid")
+		}else{
+			fmt.Println("invalid")
+		}
+	}
 }
 

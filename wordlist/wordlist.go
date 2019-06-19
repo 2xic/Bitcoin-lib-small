@@ -4,11 +4,25 @@ import (
 	"strings"
 )
 
-func Get(index int64)string{
-	return word_list[index]
+
+var wordTable = make(map[string]int)
+
+func Get(index int64) string{
+	return wordList[index]
 }
 
-var word_list = strings.Split(strings.TrimSpace(words), "\n")
+func LookUp(words string) int{
+	return wordTable[words]
+}
+
+
+func init(){	
+	for i := 0; i < len(wordList); i++ {
+		wordTable[wordList[i]] = i
+	}
+}
+
+var wordList = strings.Split(strings.TrimSpace(words), "\n")
 const(
 	words = `
 abandon
