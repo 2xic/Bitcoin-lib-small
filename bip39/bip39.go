@@ -1,14 +1,14 @@
-package main
+package bip39
 
 import (
-	"fmt"
 	"math/rand" 
 	"strconv"
 	"crypto/sha256"
 	"errors"
-	"github.com/2xic/bip-39/wordlist"
 	"time"
 	"strings"
+	"crypto/sha512"
+	"golang.org/x/crypto/pbkdf2"
 )
 
 func paddingByte(input string, size int) (output string){
@@ -25,7 +25,7 @@ func generateRandomBytes(byteCount int) (randomBytes []byte){
     return random
 }
 
-func generateMnemonicBytes(randomBytes []byte) (wordsOut string, err error){
+func GenerateMnemonicBytes(randomBytes []byte) (wordsOut string, err error){
 	lengthBytes := len(randomBytes)
 
 	if(lengthBytes < 16 || 32 < lengthBytes || lengthBytes % 4 != 0){
@@ -41,7 +41,6 @@ func generateMnemonicBytes(randomBytes []byte) (wordsOut string, err error){
 
 	bits += checksum
 
-	//words := ""
 	for i := 0; i < len(bits); i+=11 {
 		if 1 < i {
 			wordsOut += " "
@@ -50,17 +49,17 @@ func generateMnemonicBytes(randomBytes []byte) (wordsOut string, err error){
 		if(err != nil){
 			return "", errors.New("invalid byte array")
 		}
-		wordsOut += wordlist.Get(index)
+		wordsOut += Get(index)
 	}
 	return wordsOut, nil
 }
 
-func generateMnemonic() (words string, err error){
+func GenerateMnemonic() (words string, err error){
 	strength := 256
 	if strength % 32 != 0{
 		return "", errors.New("error with strength size")
 	}
-	return generateMnemonicBytes(generateRandomBytes(strength / 8))
+	return GenerateMnemonicBytes(generateRandomBytes(strength / 8))
 }
 
 
@@ -81,7 +80,7 @@ func verifyMnemonic(mnemonic string) (valid bool, err error){
 	words := strings.Split(strings.TrimSpace(mnemonic), " ")
 	bits := ""
 	for i := 0; i < len(words); i++{
-		bits += paddingByte(strconv.FormatInt(int64(wordlist.LookUp(words[i])), 2), 11)
+		bits += paddingByte(strconv.FormatInt(int64(LookUp(words[i])), 2), 11)
 	}
 
 	entropySize := (len(bits) / 33) * 32
@@ -104,22 +103,6 @@ func verifyMnemonic(mnemonic string) (valid bool, err error){
 	return false, nil
 }
 
-func main(){
-	words, err := generateMnemonic()
-	if(err != nil){
-		fmt.Println(err)
-	}else{
-		fmt.Println(words)
-	}
-	valid, err := verifyMnemonic(words)
-	if(err != nil){
-		fmt.Println(err)
-	}else{
-		if(valid){
-			fmt.Println("valid")
-		}else{
-			fmt.Println("invalid")
-		}
-	}
+func Memonic2Seed(mnemonic string, password string) []byte{	
+	return pbkdf2.Key([]byte(mnemonic), []byte("mnemonic"+password), 2048, 64, sha512.New)
 }
-

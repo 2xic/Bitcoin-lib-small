@@ -1,9 +1,8 @@
-package wordlist
+package bip39
 
 import (
 	"strings"
 )
-
 
 var wordTable = make(map[string]int)
 

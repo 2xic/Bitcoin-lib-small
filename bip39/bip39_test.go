@@ -1,4 +1,4 @@
-package main
+package bip39
 
 import (
 	"testing"
@@ -21,7 +21,7 @@ func testVerify(words string) bool{
 }
 
 func Test(t *testing.T) {
-	words, err := generateMnemonicBytes(generateSetBytes(0))
+	words, err := GenerateMnemonicBytes(generateSetBytes(0))
 	if err != nil{
 		t.Errorf("Error with vector 0")		
 	}
@@ -29,7 +29,7 @@ func Test(t *testing.T) {
 		t.Errorf("Error with vector 0")
 	}
 
-	words, err = generateMnemonicBytes(generateSetBytes(0x7F))
+	words, err = GenerateMnemonicBytes(generateSetBytes(0x7F))
 	if err != nil{
 		t.Errorf("Error with vector 1")		
 	}
@@ -37,7 +37,7 @@ func Test(t *testing.T) {
 		t.Errorf("Error with vector 1, got %s", words)
 	}
 
-	words, err = generateMnemonicBytes(generateSetBytes(0x80))
+	words, err = GenerateMnemonicBytes(generateSetBytes(0x80))
 	if err != nil{
 		t.Errorf("Error with vector 2")		
 	}
@@ -45,7 +45,7 @@ func Test(t *testing.T) {
 		t.Errorf("Error with vector 2, got %s", words)
 	}
 
-	words, err = generateMnemonicBytes(generateSetBytes(0xFF))
+	words, err = GenerateMnemonicBytes(generateSetBytes(0xFF))
 	if err != nil{
 		t.Errorf("Error with vector 2")		
 	}
