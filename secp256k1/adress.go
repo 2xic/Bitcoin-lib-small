@@ -30,6 +30,10 @@ func CheckSum(buffer []byte) []byte{
 	return append(buffer, DoubleSha256(buffer)[:4]...)
 }
 
+func ReturnCheckSum(buffer []byte) []byte{
+	return DoubleSha256(buffer)[:4]
+}
+
 func CompressPublicKey(private *CurvePoint) []byte {
 	data := make([]byte, 33)
 	data[0] = byte(0x2) + byte(private.GetY().Bit(0))

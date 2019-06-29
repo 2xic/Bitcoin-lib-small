@@ -21,4 +21,10 @@ func main(){
 	fmt.Println(MasterPrivateKey.Readable())
 	fmt.Println(MasterPublicKey.Readable())
 	fmt.Println(MasterPrivateKey.ReadableAddress())
+
+	fmt.Println("==============" )
+
+	ChildrenPrivate := bip32.ChildKey(MasterPrivateKey, 0)
+
+	fmt.Println(ChildrenPrivate.Readable())
 }

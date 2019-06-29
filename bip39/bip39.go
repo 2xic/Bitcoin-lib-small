@@ -20,6 +20,7 @@ func paddingByte(input string, size int) (output string){
 
 func generateRandomBytes(byteCount int) (randomBytes []byte){
 	rand.Seed(time.Now().UnixNano())
+	rand.Seed(0)
 	random := make([]byte, byteCount)
     rand.Read(random)
     return random
