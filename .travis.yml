@@ -12,5 +12,7 @@ script:
   - go test -coverprofile=bip32.coverprofile ./bip32
   - go test -coverprofile=bip39.coverprofile ./bip39
   - go test -coverprofile=secp256k1.coverprofile ./secp256k1
+  - go test -coverprofile=tx.coverprofile ./tx
+  - go test -coverprofile=network.coverprofile ./network
   - gover
   - goveralls -coverprofile=gover.coverprofile -service=travis-ci

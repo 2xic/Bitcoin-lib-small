@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func Test(t *testing.T) {
+func Test_tx(t *testing.T) {
 
 	//	basic tx example from https://bitcoin.org/en/developer-reference#raw-transaction-format
 

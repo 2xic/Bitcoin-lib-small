@@ -13,17 +13,17 @@ func ExtendSlice(buffer []byte, extended []byte, start int)[]byte{
 	return buffer
 }
 
-func runHash(buffer []byte, hashType hash.Hash) []byte {
+func RunHash(buffer []byte, hashType hash.Hash) []byte {
 	hashType.Write(buffer)
 	return hashType.Sum(nil)
 }
 
 func Hash160(buffer []byte) []byte {
-	return runHash(runHash(buffer, sha256.New()), ripemd160.New())
+	return RunHash(RunHash(buffer, sha256.New()), ripemd160.New())
 }
 
 func DoubleSha256(buffer []byte) []byte{
-	return runHash(runHash(buffer, sha256.New()), sha256.New())
+	return RunHash(RunHash(buffer, sha256.New()), sha256.New())
 }
 
 func CheckSum(buffer []byte) []byte{

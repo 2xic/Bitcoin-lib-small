@@ -75,7 +75,6 @@ func construct(inputs []TransactionInput, outputs[]OutputFormat) string{
 	}
 
 	txSerailize = append(txSerailize, byte(len(outputs)))
-//	fmt.Println(byte(len(outputs)))
 	for i:= 0; i < len(outputs); i++{
 		txSerailize = append(txSerailize, outputs[i].value...)
 		txSerailize = append(txSerailize, byte(outputs[i].ScriptBytesPK))
