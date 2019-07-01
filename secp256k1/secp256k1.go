@@ -36,7 +36,7 @@ func GetPublicPoint(secret* big.Int) *CurvePoint{
 }
 
 var (
-	G_X, _ = new(big.Int).SetString("79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798", 16)
-	G_Y, _ = new(big.Int).SetString("483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8", 16)
-	G, Err_g = S256Point(G_X, G_Y)
+	gX, _ = new(big.Int).SetString("79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798", 16)
+	gY, _ = new(big.Int).SetString("483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8", 16)
+	G, _ = S256Point(gX, gY)
 )

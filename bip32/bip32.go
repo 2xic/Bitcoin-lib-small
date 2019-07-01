@@ -13,11 +13,11 @@ import(
 )
 
 var (
-	version_mainet_public, _ = hex.DecodeString("0488B21E")
-	version_mainet_private, _ = hex.DecodeString("0488ADE4")
+	versionMainetPublic, _ = hex.DecodeString("0488B21E")
+	versionMainetPrivate, _ = hex.DecodeString("0488ADE4")
 
-	version_testnet_public, _ = hex.DecodeString("0x043587CF")
-	version_testnet_private, _ = hex.DecodeString("0x04358394")
+	versionTestnetPublic, _ = hex.DecodeString("0x043587CF")
+	versionTestnetPrivate, _ = hex.DecodeString("0x04358394")
 )
 
 // https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#serialization-format
@@ -31,8 +31,6 @@ type keyStruct struct{
 	Private bool
 }
 
-//	xprv9uEKuUoGik8t
-
 func Serialize(key *keyStruct) []byte{
 	buffer := new(bytes.Buffer)
 	buffer.Write(key.Version)
@@ -40,7 +38,6 @@ func Serialize(key *keyStruct) []byte{
 	buffer.Write(key.Fingerprint)
 	buffer.Write(key.ChildNumber)
 	buffer.Write(key.ChainCode)
-//	buffer.Write(make([]byte, 32))
 
 	keyBytes := key.KeyData
 	if(key.Private){
@@ -48,22 +45,6 @@ func Serialize(key *keyStruct) []byte{
 	}
 	buffer.Write(keyBytes)
 	return buffer.Bytes()
-}
-
-func allZeroBytes(stream []byte) bool {
-	for _, byte := range stream {
-		if byte != 0 {
-			return false
-		}
-	}
-	return true
-}
-
-func CheckPrivateKey(input []byte) bool{
-	if(allZeroBytes(input) || len(input) != 32 || 0 <= bytes.Compare(input, secp256k1.N.Bytes())){
-		panic("invalid private key")
-	}
-	return true;
 }
 
 //	https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#master-key-generation
@@ -79,10 +60,10 @@ func MasterPrivateKey(seed []byte) *keyStruct{
 	left := hash[:32]
 	right := hash[32:]
 
-	CheckPrivateKey(left)
+	secp256k1.CheckPrivateKey(left)
 
 	return &keyStruct{
-		version_mainet_private,
+		versionMainetPrivate,
 		0,
 		make([]byte, 4),
 		make([]byte, 4),
@@ -102,7 +83,7 @@ func MasterPublicKey(key *keyStruct) *keyStruct{
 	PrivateKey.SetBytes(keyDataBytes)
 
 	return &keyStruct{
-		version_mainet_public,
+		versionMainetPublic,
 		key.Depth,
 		key.Fingerprint,
 		key.ChildNumber,
@@ -111,40 +92,32 @@ func MasterPublicKey(key *keyStruct) *keyStruct{
 		false}
 }
 
-func parsePrivateKey(left[]byte, parrent[]byte) []byte{
-	var x = new(big.Int).SetBytes(left)
-	var y = new(big.Int).SetBytes(parrent)
-	var z = new(big.Int)
-
-	z.Add(x, y)
-	z.Mod(z, secp256k1.N)
-
-	key := z.Bytes()
-//	padding := make([]byte, 32-len(key))
-//	key = append(key, padding...)
-
-	CheckPrivateKey(key)
-	return key
-}
-
 func FourByteAlign(number int) []byte{
 	output := make([]byte, 4)
 	binary.BigEndian.PutUint32(output, uint32(number))
 	return output
 }
 
+func Private2CompressedPublic(key []byte) []byte{
+	PrivateKey := new(big.Int)
+	PrivateKey.SetBytes(key)
+	return secp256k1.CompressPublicKey(secp256k1.GetPublicPoint(PrivateKey))
+}
+
 func ChildKey(key *keyStruct, index int) (*keyStruct){
 	var data [] byte
-	
-	if(float64(index) <= math.Pow(2, 31)){
+	/*
+		Each key is based off a parent key
+	*/
+	if(math.Pow(2, 31) <= float64(index)){
+		data = append([]byte{0x0}, key.KeyData...)
+	}else{
 		if(key.Private){
-			data = append([]byte{0x0}, key.KeyData...)
+			data = Private2CompressedPublic(key.KeyData)
 		}else{
-			panic("failure, hardened children is not allowed")
+			data = key.KeyData
 		}
 	}
-
-
 	data = append(data, FourByteAlign(index)...)
 
 	hmac := hmac.New(sha512.New, key.ChainCode)
@@ -152,43 +125,33 @@ func ChildKey(key *keyStruct, index int) (*keyStruct){
 	if(err != nil){
 		panic(err)
 	}
-
 	hash := hmac.Sum(nil)
 	
+	//	as defined in the spec
 	left := hash[:32]
 	right := hash[32:]
 
-//	NewChildKey := nil
 	if(key.Private){
-		PrivateKey := new(big.Int)
-		PrivateKey.SetBytes(key.KeyData)
-		Fingerprint := secp256k1.Hash160(secp256k1.CompressPublicKey(secp256k1.GetPublicPoint(PrivateKey)))[:4]
-
 		NewChildKey := &keyStruct{
-			version_mainet_private,
+			versionMainetPrivate,
 			key.Depth + 1,
-			Fingerprint,
+			secp256k1.FingerPrint160(Private2CompressedPublic(key.KeyData)),
 			FourByteAlign(index),
 			right,
-			parsePrivateKey(left, key.KeyData),
+			secp256k1.CombinePrivateKeys(left, key.KeyData),
 			true}
 		return NewChildKey
 	}else{
-//		newKeyData := secp256k1.CompressPublicKey(secp256k1.GetPublicPoint(new(big.Int).SetBytes(left)))
-
-		panic("need add new public key with old.... (need to read some crypto)")
-
-		/*
-		NewChildKey = &keyStruct{
-			version_mainet_public,
+		NewChildKey := &keyStruct{
+			versionMainetPublic,
 			key.Depth + 1,
-			make([]byte, 4),
+			secp256k1.FingerPrint160(key.KeyData),
 			FourByteAlign(index),
 			right,
-			parsePrivateKey(left, key.KeyData),
-			true}		*/
+			secp256k1.CombinePublicKeys(Private2CompressedPublic(left), key.KeyData),
+			false}
+		return NewChildKey
 	}
-
 	return nil
 }
 

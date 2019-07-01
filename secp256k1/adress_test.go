@@ -22,5 +22,35 @@ func Test_CheckSum(t *testing.T) {
 		fmt.Println(check)
 		t.Errorf("Error with checksum")
 	}
+
+
+	check = Hash160([]byte{0})
+	if(bytes.Compare(check, []byte{159, 127, 208, 150, 211, 126, 210, 192, 227, 247, 240, 207, 201, 36, 190, 239, 79, 252, 235, 104}) != 0){
+		fmt.Println(check)
+		t.Errorf("Error with checksum")
+	}
+
+	check = FingerPrint160([]byte{0})
+	if(bytes.Compare(check, []byte{159, 127, 208, 150}) != 0){
+		fmt.Println(check)
+		t.Errorf("Error with checksum")
+	}
+	
+	test := []byte{1, 2, 3, 0, 0}
+	results := []byte{1, 2, 3, 4, 5}
+	found := ExtendSlice(test, []byte{4, 5}, 3)
+
+	if(bytes.Compare(results, found) != 0){
+		t.Errorf("Error with extender")		
+	}
+
+	if(!allZeroBytes([]byte{0, 0, 0, 0})){
+		t.Errorf("Error with extender")
+	}
+
+	if(allZeroBytes([]byte{0, 1, 0, 0})){
+		t.Errorf("Error with extender")
+	}
+
 }
 

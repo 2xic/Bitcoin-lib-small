@@ -64,29 +64,29 @@ func handshakePayload()[]byte{
 	services := BytePadding(0, 8)
 	timestamp := BytePaddingL(int(time.Now().UnixNano() / 1000000000), 8)
 
-	address_me := make([]byte, 8)
-	address_me = append(address_me, SlicePadding([]byte("127.0.0.1"), 16)...)
-	address_me = append(address_me, BytePadding(8333, 4)[2:]...)
+	addressMe := make([]byte, 8)
+	addressMe = append(addressMe, SlicePadding([]byte("127.0.0.1"), 16)...)
+	addressMe = append(addressMe, BytePadding(8333, 4)[2:]...)
 
-	address_you := make([]byte, 8)
-	address_you = append(address_you, SlicePadding([]byte("127.0.0.1"), 16)...)
-	address_you = append(address_you, BytePadding(8333, 4)[2:]...)
+	addressYou := make([]byte, 8)
+	addressYou = append(addressYou, SlicePadding([]byte("127.0.0.1"), 16)...)
+	addressYou = append(addressYou, BytePadding(8333, 4)[2:]...)
 
 	nonce := make([]byte, 8)
 	rand.Read(nonce)
 
-	user_agent := make([]byte, 1)
+	userAgent := make([]byte, 1)
 	height := make([]byte, 4)
 
 	payload := make([]byte, 0)
 	payload = append(payload, version...)
 	payload = append(payload, services...)
 	payload = append(payload, timestamp...)
-	payload = append(payload, address_me...)
-	payload = append(payload, address_you...)
+	payload = append(payload, addressMe...)
+	payload = append(payload, addressYou...)
 
 	payload = append(payload, nonce...)
-	payload = append(payload, user_agent...)
+	payload = append(payload, userAgent...)
 	payload = append(payload, height...)
 
 	return payload
@@ -159,7 +159,6 @@ func handshakeNode(connection net.Conn){
 		panic(err)
 	}
 }
-
 
 func Getblock() *[]byte{
 	addrs, err := net.LookupHost("dnsseed.bluematt.me")

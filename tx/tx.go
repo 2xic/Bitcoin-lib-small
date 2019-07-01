@@ -18,7 +18,6 @@ type Transaction struct{
 
 
 type TransactionInput struct {
-//	previous_output []byte // 36 byte
 	hash []byte // 32 byte
 	index []byte 
 
@@ -39,7 +38,6 @@ func FourByteAlign(number int) []byte{
 	binary.LittleEndian.PutUint32(output, uint32(number))
 	return output
 }
-
 
 func EigthByteAlign(number int) []byte{
 	output := make([]byte, 8)

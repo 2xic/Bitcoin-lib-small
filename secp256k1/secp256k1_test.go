@@ -3,6 +3,10 @@ package secp256k1
 import (
 	"testing"
 	"math/big"
+	"github.com/2xic/bip-39/base58"
+	"strings"
+	"crypto/hmac"
+	"crypto/sha512"
 )
 
 func Test_Point(t *testing.T) {
@@ -176,3 +180,38 @@ func Test_private_to_public(t *testing.T) {
 		}
 	}
 }
+
+
+func Test_valid_private(t *testing.T){
+	hmac := hmac.New(sha512.New, []byte("Bitcoin seed"))
+	_, err := hmac.Write([]byte{0})
+	if err != nil {
+		t.Errorf("Error with hmac")
+	}else{
+		hash := hmac.Sum(nil)
+		if(!CheckPrivateKey(hash[:32])){
+			t.Errorf("Error with private key validation")
+		}
+	}
+}
+
+func Test_compress(t *testing.T){
+	coefficient := new(big.Int).Exp(big.NewInt(999), big.NewInt(3), nil)
+	point := GetPublicPoint(coefficient)
+
+	test := CompressPublicKey(point)
+	x, y := ExpandPublicKey(test)
+
+	if(!(point.GetY().Cmp(y) == 0 && point.GetX().Cmp(x) == 0)){
+		t.Errorf("Error with public key compression")
+	}
+
+	coefficient = new(big.Int).Exp(big.NewInt(888), big.NewInt(3), nil)
+	point = GetPublicPoint(coefficient)
+	
+	results := CompressAddress(point)
+	if(!(strings.Compare(base58.ConvertBytes(results), "148dY81A9BmdpMhvYEVznrM45kWN32vSCN") == 0)){
+		t.Errorf("Error with address compression")
+	}
+}
+

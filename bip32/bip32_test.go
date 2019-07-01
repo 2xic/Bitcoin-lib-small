@@ -26,5 +26,15 @@ func Test_addr(t *testing.T) {
 		panic("wrong address")
 	}
 
+	ChildrenPrivate := ChildKey(MasterPrivateKey, 0)
+	ChildrenPublic := ChildKey(MasterPublicKey, 0)
+
+	if(strings.Compare(ChildrenPrivate.Readable(), "xprv9uHRZZhbkedL37eZEnyrNsQPFZYRAvjy5rt6M1nbEkLSo378x1CQQLo2xxBvREwiK6kqf7GRNvsNEchwibzXaV6i5GcsgyjBeRguXhKsi4R")) != 0{
+		panic("wrong child public key")
+	}
+
+	if(strings.Compare(ChildrenPublic.Readable(), "xpub68Gmy5EVb2BdFbj2LpWrk1M7obNuaPTpT5oh9QCCo5sRfqSHVYWex97WpDZzszdzHzxXDAzPLVSwybe4uPYkSk4G3gnrPqqkV9RyNzAcNJ1")) != 0{
+		panic("wrong child public key")
+	}
 }
 
