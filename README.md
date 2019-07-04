@@ -1,7 +1,7 @@
-# Bitcoin
+# Small Bitcoin lib
 
-[![Build Status](https://travis-ci.org/2xic/bip-39.svg?branch=master)](https://travis-ci.org/2xic/bip-39)
-[![Coverage Status](https://coveralls.io/repos/github/2xic/bip-39/badge.svg?branch=master)](https://coveralls.io/github/2xic/bip-39?branch=master)
+[![Build Status](https://travis-ci.org/2xic/Bitcoin-lib-small.svg?branch=master)](https://travis-ci.org/2xic/Bitcoin-lib-small)
+[![Coverage Status](https://coveralls.io/repos/github/2xic/Bitcoin-lib-small/badge.svg?branch=master)](https://coveralls.io/github/2xic/Bitcoin-lib-small?branch=master)
 
 Visiting different parts of the Bitcoin stack, *not* writing a complete Bitcoin library. I won't spend time writing code that I don't learn from. For instance I won't learn that much more by implementing the entire network protocol, so I will rather explore another part of the stack. Look at [btcsuite](https://github.com/btcsuite) if you are looking for production software. This repo is mostly for me to learn, *not* to write production software. Can't experiment with elliptic curves if I write production software ;) (don't roll your own crypto)
 
