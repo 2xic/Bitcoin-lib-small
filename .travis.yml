@@ -14,5 +14,6 @@ script:
   - go test -coverprofile=secp256k1.coverprofile ./secp256k1
   - go test -coverprofile=tx.coverprofile ./tx
   - go test -coverprofile=network.coverprofile ./network
+  - go test -coverprofile=mining.coverprofile ./mining
   - gover
   - goveralls -coverprofile=gover.coverprofile -service=travis-ci
